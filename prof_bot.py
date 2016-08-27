@@ -4,20 +4,25 @@ import configparser
 import re
 import argparse
 import setup
+import logging
 
 commented = set()
-
-USERNAME = "uoft_prof_bot"
-PASSWORD = "123456"
+config = configparser.ConfigParser()
+config.read("user.ini")
+USERNAME = config["info"]["name"]
+PASSWORD = config["info"]["password"]
 r = praw.Reddit(user_agent="testing")
 r.login(USERNAME, PASSWORD, disable_warning=True)
 
 def main():
     data_extract = setup.Data_Extractor()
-    subreddit = r.get_subreddit("testingground4bots")
+    subreddit = r.get_subreddit(config["info"]["subreddit"])
     comments = subreddit.get_comments(limit = 100)
     for comment in comments:
         if not is_command(comment.body):
+            continue
+        #do not reply to the bot itself
+        if comment.author.name == USERNAME:
             continue
         profs = get_wanted_prof(comment.body)
         reply = ""
@@ -32,6 +37,7 @@ def main():
         reply = reply + "\n\n" + get_usage_instruction()
         if comment.id not in commented:
             comment.reply(reply)
+            print("replied")
             commented.add(comment.id)
 
 #return a list of professors to be searched
@@ -52,14 +58,15 @@ def parse_argument(arg):
     return wanted
 
 def get_usage_instruction():
-    return "usage: !prof (prof1 full name) (prof2 full name) ..."
+    return "usage: !prof (prof1 name) (prof2 name) ... \n\n" + \
+            "name can be in the format of (first last), (first initial last), (last first)"
 
 if __name__ == "__main__":
     while True:
         try:
             main()
         except:
-            break
-        break
-        #print("done cycle")
-        #time.sleep(5)
+            logging.exception("bad stuff happened")
+        print("done cycle")
+        time.sleep(5)
+        #break

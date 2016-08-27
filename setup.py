@@ -1,7 +1,6 @@
 import re
 import requests
 
-#URL = 'http://www.facebook.com'
 class Data_Extractor():
     params = {"solrformat": "true",
               "rows": "4000",  # set it high number to always get all rows.
@@ -47,6 +46,10 @@ class Data_Extractor():
         prof_data_list = content.split("{")
         for prof in prof_data_list:
             self.extract_info(prof)
+
+    '''
+    Get professors in the three campuses
+    '''
     def get_st_george(self):
         self.params["q"] = self.ST_GEORGE_PARAM
         self.get_school()
@@ -59,11 +62,13 @@ class Data_Extractor():
         self.params["q"] = self.SCRA_PARAM
         self.get_school()
 
+    #helper function to parse the document we get
     def get_within(self, content):
         index1 = content.find("[")
         index2 = content.find("]")
         return content[index1 + 1 : index2]
 
+    #read the document and store all the relevant info in a list
     def extract_info(self, prof_data):
         prof_id_result = re.search('(?<="pk_id":)([0-9]*)', prof_data)
         if prof_id_result is None:
@@ -88,6 +93,7 @@ class Data_Extractor():
         '''
         self.prof_info_list.append([prof_id, prof_first, prof_last, avg_rating])
 
+    #search for the professors in our list
     def search_prof(self, name):
         for data in self.prof_info_list:
             if self.match_name(data[1], data[2], name):
@@ -97,6 +103,20 @@ class Data_Extractor():
                 return comment
         return "{} Cannot be Found\n\n".format(name)
 
+    '''
+     let's say we want to match Bill Gates
+     then we can either input (case insensetive)
+     1. bill gates
+     2. b. gates
+     3. b.gates
+     4. gates bill
+     '''
     def match_name(self, first_name, last_name, input_name):
+        #apprantly there are empty spaces added inside of the data list
+        if first_name == "":
+            return False
+
         return ((first_name.lower() + " " + last_name.lower()) == input_name.lower()) or \
-               ((last_name.lower() + " " + first_name.lower()) == input_name.lower())
+               ((first_name[0].lower() + " " + last_name.lower()) == input_name.lower()) or \
+               ((first_name[0]).lower() + ". " + last_name.lower() == input_name.lower()) or \
+                ((last_name.lower() + " " + first_name.lower()) == input_name.lower())
