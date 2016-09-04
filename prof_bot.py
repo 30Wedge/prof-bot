@@ -67,6 +67,6 @@ if __name__ == "__main__":
             main()
         except:
             logging.exception("bad stuff happened")
-        print("done cycle")
+        #print("done cycle")
         time.sleep(5)
         #break
