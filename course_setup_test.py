@@ -40,3 +40,9 @@ class test_setup_methods(unittest.TestCase):
         self.assertTrue("CSC108H1F" in comment, "CSC108H1F should be valid course in st.george")
         self.assertTrue("CSC108H5F" in comment, "CSC108H5F should be valid course in scraborough")
         self.assertFalse("CSC108H3F" in comment, "CSC108H3F should not be a course in mississague")
+
+        course_code = "CSC107 Fall"
+        course_extractor = course_setup.Course_extractor(course_code)
+        comment = course_extractor.get_comment()
+        self.assertTrue("cannot be found" in comment, "CSC107 Fall should not be a valid course in u of t")
+

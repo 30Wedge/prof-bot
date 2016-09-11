@@ -87,7 +87,8 @@ class Course_extractor():
             try:
                 json_data = json.loads(content)
                 prof_set = Course_extractor.get_prof_set_from_api(json_data)
-            except:     #if the given api is down, we get the info from the data repo
+            except:     #if the given api is down, we get the info from the data repo'
+                print("api down?")
                 json_data = Course_extractor.load_old_data(code)
                 prof_set = Course_extractor.get_prof_set_from_dataset(json_data)
 
@@ -108,4 +109,8 @@ class Course_extractor():
 
     def get_comment(self):
         code_list = Course_extractor.get_full_code(self.code)
-        return Course_extractor.get_comment_with_code_list(code_list)
+
+        comment = Course_extractor.get_comment_with_code_list(code_list)
+        if comment == "":
+            return "Course {} cannot be found".format(self.code)
+        return comment
