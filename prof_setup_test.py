@@ -1,9 +1,10 @@
 import unittest
-import setup
+import prof_setup
 class test_setup_methods(unittest.TestCase):
+
     @classmethod
     def setUpClass(self):
-        self.extractor = setup.Data_Extractor()
+        self.extractor = prof_setup.Data_Extractor()
         try:
             self.extractor.setup()
         except:
@@ -54,9 +55,15 @@ class test_setup_methods(unittest.TestCase):
     '''
     The following methods are for testing the search_prof function
     '''
-    def test_search_prof(self):
-        pass
+    def test_search_prof_found(self):
+        name_to_search = "Danny Heap"
+        result = "not found" in self.extractor.search_prof(name_to_search).lower()
+        self.assertFalse(result, msg="Prof not found")
 
+    def test_search_prof_not_found(self):
+        name_to_search = "Dan Heap"
+        result = "not found" not in self.extractor.search_prof(name_to_search).lower()
+        self.assertTrue(result, msg="Wrong prof found")
 
 if __name__ == "__main__":
     unittest.main()
