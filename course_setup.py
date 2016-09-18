@@ -6,6 +6,7 @@ import prof_setup
 import os
 
 AUTH_KEY = 'f10PmtguE4iXA3dpz3mfqsTxZdVCwMXt'
+
 class Course_extractor():
 
     def __init__(self, code):
@@ -79,6 +80,7 @@ class Course_extractor():
     def get_comment_with_code_list(code_list):
         found = False                   #flag for if any campus has this course
         comment = ""
+        comment_list = []
         for code in code_list:
             url = 'https://cobalt.qas.im/api/1.0/courses/search?q="{}"'.format(code)
             r = requests.get(url, headers={'Authorization': AUTH_KEY})
@@ -101,11 +103,49 @@ class Course_extractor():
 
             #we only want to print the same prof once
             for prof in prof_set:
-                comment += (data_extract.search_prof(prof)) + "\n\n"
-                comment += "--------------------------------\n\n"
+                comment_list.append(data_extract.search_prof(prof))
+                #comment += (data_extract.search_prof(prof)) + "\n\n"
+                #comment += "--------------------------------\n\n"
+            sorted_comment_list = Course_extractor.get_sorted_comments(comment_list)
+            comment += Course_extractor.get_reply_from_sorted_comments(sorted_comment_list)
+
         if not found:
             comment = ""
         return comment
+
+    def get_comment_rating(comment):
+        rating_result = re.search("(?<=is: )(([0-9]*)\.([0-9])*)", comment)
+        if rating_result is None:
+            return -1
+        return float(rating_result.group(0))
+
+    def get_sorted_comments(comment_list):
+        comment_rating_list = []
+        for comment in comment_list:
+            comment_rating_list.append([comment, Course_extractor.get_comment_rating(comment)])
+        comment_rating_list.sort(key=lambda comment: comment[1], reverse=True)
+        return comment_rating_list
+
+    def get_reply_from_sorted_comments(sorted_comments):
+        if len(sorted_comments) >= 1:
+            if sorted_comments[0][1] >= 0:         #if at least 1 prof is recorded in RMP(ie the prof who has the
+                                                #highest rating has a rating >= 0
+                reply = "The best professor for this course(according to the rating) is:\n\n"
+                reply += sorted_comments[0][0]
+            else:
+                reply = "Looks like none of the professors in this course has been recorded in RateMyProfessor\n\n"
+                reply += sorted_comments[0][0]
+
+            #since we've takken care of the first one
+            if len(sorted_comments) > 1:            #if there are other profs
+                reply += "Other professors in this course are\n\n"
+                for comment_data in sorted_comments[1:]:
+                    reply += comment_data[0]
+
+        else:
+            return "Looks like professors in this course have yet to be announced\n\n"
+
+        return reply
 
     def get_comment(self):
         code_list = Course_extractor.get_full_code(self.code)

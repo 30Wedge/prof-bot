@@ -57,8 +57,8 @@ class test_setup_methods(unittest.TestCase):
     '''
     def test_search_prof_found(self):
         name_to_search = "Danny Heap"
-        result = "not found" in self.extractor.search_prof(name_to_search).lower()
-        self.assertFalse(result, msg="Prof not found")
+        result = "average rating" in self.extractor.search_prof(name_to_search).lower()
+        self.assertTrue(result, msg="Prof not found")
 
     def test_search_prof_not_found(self):
         name_to_search = "Dan Heap"

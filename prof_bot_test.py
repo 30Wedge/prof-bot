@@ -27,4 +27,3 @@ class test_prof_bot(unittest.TestCase):
         name = "danny heap"
         self.assertFalse(prof_bot.is_course_name(name), "A prof name definitely should not be a course name")
 
-
